@@ -1,6 +1,7 @@
 @echo off
 setlocal
 
+set "vcpkg=D:\vcpkg\installed\x64-windows"
 set "mode=%1"
 set "target=%2"
 
@@ -11,24 +12,22 @@ echo BUILD OPTIONS: dev, release
 exit /b 1
 
 :dev
-set "flags=-g -O0 -Wall -Wextra -std=c++17"
-goto configure
+set "flags=/Zi /Od /MDd /W4"
+goto config
 
 :release
-set "flags=-O3 -Wall -Wextra -std=c++17"
-goto configure
+set "flags=/O2 /MD /W4"
+goto config
 
-:configure
+:config
 if "%target%"=="web" goto web
-set "compiler=g++"
 set "libs=-lglfw3 -lopengl32"
-set "output=build\device.exe"
+@REM  set "output=build\device.exe"
 goto compile
 
 :web
-set "compiler=em++"
 set "libs=-s USE_GLFW=3 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2"
-set "output=build\index.html"
+@REM  set "output=build\index.html"
 goto compile
 
 :compile
@@ -36,37 +35,54 @@ if exist build rmdir /s /q build
 if not exist bin mkdir bin
 mkdir build
 
-%compiler% %flags% ^
-    -I./lib ^
-    -I./lib/imgui ^
-    -I./lib/imgui/backends ^
-    src\*.cpp ^
-    lib\imgui\*.cpp ^
-    lib\imgui\backends\imgui_impl_glfw.cpp ^
-    lib\imgui\backends\imgui_impl_opengl3.cpp ^
-    %libs% ^
-    -o %output%
+if "%target%"=="web" (
+    em++ %flags% ^
+        -I./lib ^
+        -I./lib/imgui ^
+        -I./lib/imgui/backends ^
+        src\*.cpp ^
+        lib\imgui\*.cpp ^
+        lib\imgui\backends\imgui_impl_glfw.cpp ^
+        lib\imgui\backends\imgui_impl_opengl3.cpp ^
+        %libs% ^
+        -o build\index.html
+) else (
+    cl.exe /nologo /std:c++17 %flags% ^
+        /I"%vcpkg%\include" ^
+        /I.\lib ^
+        /I.\lib\imgui ^
+        /I.\lib\imgui\backends ^
+        src\*.cpp ^
+        /Fobuild\ ^
+        /Fdbuild\ ^
+        /Febuild\device.exe ^
+        lib\imgui\*.cpp ^
+        lib\imgui\backends\imgui_impl_glfw.cpp ^
+        lib\imgui\backends\imgui_impl_opengl3.cpp ^
+        /link ^
+        /LIBPATH:"%vcpkg%\lib" ^
+        glfw3dll.lib glew32.lib opengl32.lib gdi32.lib user32.lib shell32.lib
+)
 
 if %errorlevel% neq 0 goto error
-if "%target%"=="web" goto web_done
+if "%target%"=="web" goto done
+
+copy /y "%vcpkg%\bin\glew32.dll" bin\ >nul
+copy /y "%vcpkg%\bin\glfw3.dll" bin\ >nul
 
 copy /y build\device.exe bin\ >nul
 
-if "%mode%"=="release" goto release_resources
+if "%mode%"=="release" goto copy
 
 if exist res mklink /J bin\res res >nul
 goto done
 
-:release_resources
+:copy
 if exist res (
     if exist bin\res rmdir /s /q bin\res
     xcopy res bin\res /E /I /Y >nul
 )
 goto done
-
-:web_done
-echo WEB BUILD COMPLETE
-goto eof
 
 :error
 echo BUILD ERROR
