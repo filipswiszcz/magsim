@@ -6,7 +6,7 @@
 
 #include "device.h"
 
-device *DEVICE = nullptr;
+device *g_device = nullptr;
 
 device_status device::initialize(void) noexcept {
     if (!MS_ASSERT(glfwInit())) {
@@ -61,11 +61,57 @@ device_status device::initialize(void) noexcept {
     return device_status::SUCCESS;
 }
 
-void device::terminate(void) noexcept {}
+void device::tick(void) noexcept {
+    glfwPollEvents();
 
-void _ems_tick(void) {}
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Data");
+    ImGui::Text("#0 null");
+    ImGui::End();
+
+    ImGui::Render();
+
+    int display_width, display_height;
+    glfwGetFramebufferSize(this->platform.window, &display_width, &display_height);
+    glViewport(0, 0, display_width, display_height);
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    glfwSwapBuffers(this->platform.window);
+}
+
+void device::terminate(void) noexcept {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    glfwDestroyWindow(this->platform.window);
+    glfwTerminate();
+}
+
+void _ems_tick(void) {
+    if (g_device) {
+        g_device->tick();
+    }
+}
 
 i32 main(void) {
-    std::cout << "v" << std::endl;
+    device device;
+    g_device = &device;
+    device.initialize();
+
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(_ems_tick, 0, 1);
+#else
+    while (!glfwWindowShouldClose(device.get_window())) {
+        _ems_tick();
+    }
+#endif
+
+    device.terminate();
     return 0;
 }

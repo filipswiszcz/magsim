@@ -32,11 +32,14 @@ enum class device_status : u8 {
 class device final {
 public:
     [[nodiscard]] device_status initialize(void) noexcept;
+    void tick(void) noexcept;
     void terminate(void) noexcept;
+
+    inline GLFWwindow *get_window() const { // super temp
+        return platform.window;
+    }
 private:
     platform_t platform;
-
-    void _ems_tick(void);
 };
 
 #endif // !MS_DEVICE_H
