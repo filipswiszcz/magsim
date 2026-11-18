@@ -3,6 +3,9 @@
 
 #include <cstdint>
 
+#define MS_LOG(_m, ...) ((void) 0)
+#define MS_ASSERT(_e) ((_e) ? 1 : (MS_LOG("%s,%d: Assertion '%s' failed.\n", __FILE__, __LINE__, #_e), 0))
+
 typedef float f32;
 typedef double f64;
 typedef int8_t i8;
