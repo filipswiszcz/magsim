@@ -2,3 +2,16 @@ magsim
 ======
 
 Simulation of magnetic-field-driven microrobot motion.
+
+DEPENDENCIES
+------------
+
+* Emscripten
+* OpenGL
+* GLFW
+
+COMPILATION
+-----------
+
+* Windows: build.bat [dev/release]
+* Linux/macOS: build.sh [dev/release]
