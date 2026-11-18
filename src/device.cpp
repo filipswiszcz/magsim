@@ -3,6 +3,10 @@
 #include "device.h"
 
 device_status device::initialize(void) noexcept {
+    if (!MS_ASSERT(glfwInit())) {
+        // do smth to stop this madness
+    }
+
     return device_status::SUCCESS;
 }
 
