@@ -1,7 +1,11 @@
 #ifndef MS_DEVICE_H
 #define MS_DEVICE_H
 
-#ifdef __APPLE__
+#ifdef __EMSCRIPTEN__
+    #include <emscripten.h>
+    #include <GLES3/gl3.h>
+    #include <GLFW/glfw3.h>
+#elif __APPLE__
     #define GL_SILENCE_DEPRECATION
     #define GLFW_INCLUDE_GLCOREARB
     #include <GLFW/glfw3.h>
@@ -19,7 +23,10 @@ typedef struct {
 } platform_t;
 
 enum class device_status : u8 {
-    SUCCESS = 0
+    SUCCESS = 0,
+    GLFW_INIT_ERROR, // i should change GLFW prefixes (it mixes with actual glfw flags)
+    GLFW_WINDOW_ERROR,
+    GLEW_INIT_ERROR
 };
 
 class device final {
