@@ -6,6 +6,8 @@
 
 #include "device.h"
 
+// render it with github pages
+
 device *g_device = nullptr;
 
 device_status device::initialize(void) noexcept {
@@ -55,6 +57,7 @@ device_status device::initialize(void) noexcept {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
+    ImGui::GetIO().IniFilename = nullptr;
     ImGui_ImplGlfw_InitForOpenGL(this->platform.window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 

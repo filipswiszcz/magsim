@@ -53,12 +53,12 @@ if "%target%"=="web" (
         /I.\lib\imgui ^
         /I.\lib\imgui\backends ^
         src\*.cpp ^
-        /Fobuild\ ^
-        /Fdbuild\ ^
-        /Febuild\device.exe ^
         lib\imgui\*.cpp ^
         lib\imgui\backends\imgui_impl_glfw.cpp ^
         lib\imgui\backends\imgui_impl_opengl3.cpp ^
+        /Fo"build\\" ^
+        /Fd"build\vc.pdb" ^
+        /Febuild\device.exe ^
         /link ^
         /LIBPATH:"%vcpkg%\lib" ^
         glfw3dll.lib glew32.lib opengl32.lib gdi32.lib user32.lib shell32.lib
